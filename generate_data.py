@@ -33,9 +33,8 @@ test_files = audio_filenames[train_size:]
 
 # set paths for where irs and stored data should go
 ir_filepath = Path(args.ir_src)
-# ir_filenames = sorted(ir_filepath.glob('0*.wav')) + sorted(ir_filepath.glob('1*.wav'))
 ir_filenames = sorted(ir_filepath.glob('*.wav'))
-
+ir_filenames = [x for x in ir_filenames if not x.name.startswith('.')]
 spec_path = Path(args.output_path)
 
 # set up values for the spectrogram as hyperparams
@@ -85,7 +84,6 @@ print("Processing clean training files...")
 count = 0
 for file in train_files:
     count += 1
-    print('Processing {}'.format(file))
     process_spectrograms_from_file(file, sample_rate, spec_path / 'train/0.0/rt0.0_{:04}.pt'.format(count))
 
 # generate clean test files
@@ -111,11 +109,11 @@ for ir in ir_filenames:
 # generate convolved train files
 count = 0
 print("Processing convolved training files...")
-for ir in ir_filenames:
+for ir in ir_filenames[3:]:
     print("Convolving files for {}s IR".format(ir.stem))
     processed_ir = process_ir(ir, sample_rate)
     count = 0
-    for file in train_files:
+    for file in train_files[3:]:
         count += 1
         convolved_speech = process_speech(file, sample_rate, processed_ir)
         output_path = spec_path/'train'/'{}'.format(ir.stem)/'rt{}_{:04}.pt'.format(ir.stem, count)
