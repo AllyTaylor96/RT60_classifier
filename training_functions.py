@@ -5,6 +5,7 @@ Bulk of the code for the nitty-gritty training here.
 import numpy as np
 import torch
 import time
+import torch.nn.functional as F
 
 
 if torch.cuda.is_available():
@@ -27,7 +28,13 @@ def pt_loader(path, eps=1e-6):
   spec_norm = (spec - mean) / (std + eps)
   spec_min, spec_max = spec_norm.min(), spec_norm.max()
   spec_scaled = 255 * (spec_norm - spec_min) / (spec_max - spec_min)
-  return spec_scaled
+  if list(spec_scaled.shape) == [1, 401, 61]:
+      return spec_scaled
+  else:
+      print("Padding file due to shortness")
+      spec_padded = F.pad(spec_scaled, (0, 61 - spec_scaled.shape[2]))
+      return spec_padded
+
 
 def train(model, loss_fn, train_loader, valid_loader, epochs, optimizer,
           train_losses, valid_losses, train_history, accuracy_history, change_lr=None):
