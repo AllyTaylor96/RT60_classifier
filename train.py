@@ -48,7 +48,8 @@ train_dataset, valid_dataset = torch.utils.data.random_split(dataset,
 """
 Load data into torch
 """
-params = {'batch_size': 10, 'shuffle': True} # can amend these
+params = {'batch_size': 64, 'shuffle': True} # can amend these
+print('Batch size: {}'.format(params['batch_size']))
 training_generator = torch.utils.data.DataLoader(train_dataset, **params)
 validation_generator = torch.utils.data.DataLoader(valid_dataset, **params)
 

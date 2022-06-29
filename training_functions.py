@@ -45,6 +45,8 @@ def train(model, loss_fn, train_loader, valid_loader, epochs, optimizer,
 #    if change_lr:
 #      optimizer = change_lr(optimizer, epoch)
     for i, data in enumerate(train_loader):
+      if i % 100 == 0:
+          print('{} batches completed in training'.format(i))
       x, y = data
       x, y = x.to(device), y.to(device)
       optimizer.zero_grad()

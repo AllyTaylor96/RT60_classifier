@@ -109,11 +109,11 @@ for ir in ir_filenames:
 # generate convolved train files
 count = 0
 print("Processing convolved training files...")
-for ir in ir_filenames[3:]:
+for ir in ir_filenames:
     print("Convolving files for {}s IR".format(ir.stem))
     processed_ir = process_ir(ir, sample_rate)
     count = 0
-    for file in train_files[3:]:
+    for file in train_files:
         count += 1
         convolved_speech = process_speech(file, sample_rate, processed_ir)
         output_path = spec_path/'train'/'{}'.format(ir.stem)/'rt{}_{:04}.pt'.format(ir.stem, count)
