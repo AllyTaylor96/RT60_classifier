@@ -64,8 +64,8 @@ else:
 """
 Set up hyperparameters, variables for training and import model
 """
-learning_rate = 0.001
-num_epochs = 10
+learning_rate = 0.0001
+num_epochs = 20
 loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(resnet_model.parameters(), lr=learning_rate)
 resnet_model = resnet_model.to(device)
@@ -88,7 +88,7 @@ torch.save(resnet_model, path)
 """
 Save results and plot the history
 """
-with open('results/results.txt', 'w') as f:
+with open('results/results_bs{}_lr{}_epochs{}.txt'.format(params['batch_size'], learning_rate, num_epochs), 'w') as f:
     f.write('Training Loss per epoch: \n')
     for key in train_history.keys():
         f.write("'{}':'{}'\n".format(key, train_history[key]))
@@ -107,4 +107,4 @@ ax.plot(list(accuracy_history.values()), lw=3)
 ax.set_title('Training Accuracy', size=15)
 ax.set_xlabel('Epoch', size=15)
 ax.tick_params(axis='both', which='major', labelsize=15)
-plt.savefig('results/training_graph.png')
+plt.savefig('results/training_graph_bs{}_lr{}_epochs{}.png'.format(params['batch_size'], learning_rate, num_epochs))
