@@ -14,8 +14,8 @@ else:
     device = torch.device('cpu')
 
 
-def lr_decay(optimizer, epoch):
-  if epoch % 10 == 0:
+def lr_decay(learning_rate, optimizer, epoch):
+  if epoch % 5 == 0:
     new_lr = learning_rate / (10 ** (epoch // 10))
     optimizer = setlr(optimizer, new_lr)
     print(f'Changed learning rate to {new_lr}')
@@ -31,21 +31,19 @@ def pt_loader(path, eps=1e-6):
   if list(spec_scaled.shape) == [1, 401, 61]:
       return spec_scaled
   else:
-      print("Padding file due to shortness")
       spec_padded = F.pad(spec_scaled, (0, 61 - spec_scaled.shape[2]))
       return spec_padded
 
 
 def train(model, loss_fn, train_loader, valid_loader, epochs, optimizer,
-          train_losses, valid_losses, train_history, accuracy_history, change_lr=None):
+          train_losses, valid_losses, train_history, accuracy_history,
+          scheduler):
+  start_time = time.time()
   for epoch in range(1,epochs+1):
-    start_time = time.time()
     model.train()
     batch_losses=[]
-#    if change_lr:
-#      optimizer = change_lr(optimizer, epoch)
     for i, data in enumerate(train_loader):
-      if i % 100 == 0:
+      if i % 200 == 0:
           print('{} batches completed in training'.format(i))
       x, y = data
       x, y = x.to(device), y.to(device)
@@ -74,6 +72,7 @@ def train(model, loss_fn, train_loader, valid_loader, epochs, optimizer,
       trace_yhat.append(y_hat.cpu().detach().numpy())
       batch_losses.append(loss.item())
     valid_losses.append(batch_losses)
+    scheduler.step(np.mean(valid_losses[-1]))
     trace_y = np.concatenate(trace_y)
     trace_yhat = np.concatenate(trace_yhat)
     accuracy = np.mean(trace_yhat.argmax(axis=1)==trace_y)
