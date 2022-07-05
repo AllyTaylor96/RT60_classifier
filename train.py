@@ -38,7 +38,6 @@ pickle.dump(classifier_classes, open("results/classes", "wb"))
 """
 Split the dataset into test and train
 """
-# split dataset into train and test groups
 train_size = int(0.9 * len(dataset))
 valid_size = len(dataset) - train_size
 print('Training size: {} \nValidation size: {}'.format(train_size, valid_size))
