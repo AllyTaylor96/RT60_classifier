@@ -28,11 +28,11 @@ def pt_loader(path, eps=1e-6):
   spec_norm = (spec - mean) / (std + eps)
   spec_min, spec_max = spec_norm.min(), spec_norm.max()
   spec_scaled = 255 * (spec_norm - spec_min) / (spec_max - spec_min)
-  if list(spec_scaled.shape) == [1, 401, 61]:
+  if list(spec_scaled.shape) == [1, 401, 241]:
       return spec_scaled
   else:
-      spec_padded = F.pad(spec_scaled, (0, 61 - spec_scaled.shape[2]))
-      return spec_padded
+      print('Passing file')
+      pass
 
 
 def train(model, loss_fn, train_loader, valid_loader, epochs, optimizer,
@@ -78,5 +78,5 @@ def train(model, loss_fn, train_loader, valid_loader, epochs, optimizer,
     accuracy = np.mean(trace_yhat.argmax(axis=1)==trace_y)
     end_time = time.time()
     print(f'Epoch - {epoch} Valid-Loss : {np.mean(valid_losses[-1])} Valid-Accuracy : {accuracy}')
-    print('Elapsed time {}s'.format(end_time - start_time))
+    print('Elapsed time {}mins'.format(int(end_time - start_time) / 60))
     accuracy_history[epoch] = accuracy

@@ -7,6 +7,10 @@ from pathlib import Path
 from collections import Counter
 import matplotlib.pyplot as plt
 import argparse
+from sklearn.metrics import confusion_matrix
+import seaborn as sn
+import pandas as pd
+import numpy as np
 
 # load in file location
 parser = argparse.ArgumentParser(description='Test RT60',
@@ -20,7 +24,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # load in classifier classes, saved model and put into eval mode
 classifier_classes = pickle.load(open('results/classes', 'rb'))
-model = torch.load('rt60_classifier.pt')
+model = torch.load('2s_rt60_classifier.pt')
 model.eval()
 if torch.cuda.is_available():
         model.cuda()
@@ -56,7 +60,7 @@ for path in sorted(data_direc.glob('*.pt')):
 # print amount of each class detected
 #from pprint import pprint
 #pprint(results)
-with open('results/test_results.txt', 'w') as f:
+with open('results/2s_test_results.txt', 'w') as f:
     f.write('Actual RT: 0.0 | Predictions: {} \n'.format(Counter(results_00)))
     f.write('Actual RT: 0.2 | Predictions: {} \n'.format(Counter(results_02)))
     f.write('Actual RT: 0.4 | Predictions: {} \n'.format(Counter(results_04)))
@@ -64,4 +68,23 @@ with open('results/test_results.txt', 'w') as f:
     f.write('Actual RT: 0.8 | Predictions: {} \n'.format(Counter(results_08)))
     f.write('Actual RT: 1.0 | Predictions: {}'.format(Counter(results_10)))
 
+# implement confusion matrix
+true = []
+pred = []
+for key, value in results.items():
+    true.append(key[2:5])
+    pred.append(value)
 
+cf_matrix = confusion_matrix(true, pred)
+cm_classes = ('0.0', '0.2', '0.4', '0.6', '0.8', '1.0')
+df_cm = pd.DataFrame(cf_matrix/np.sum(cf_matrix) * 6,
+                     index = [i for i in cm_classes],
+                     columns = [i for i in cm_classes])
+
+# plot confusion matrix
+plt.figure(figsize=(12, 7))
+sn.heatmap(df_cm, annot=True)
+plt.xlabel('Predicted label')
+plt.ylabel('Actual label')
+plt.title('RT60 2.0 Classifier Performance')
+plt.savefig('results/2s_cf_mat.png')

@@ -9,6 +9,7 @@ spectro generation in a single step.
 import torchaudio
 import torchaudio.functional as F
 import torchaudio.transforms as T
+import torchvision
 from utils import *
 from pathlib import Path
 import argparse
@@ -18,12 +19,19 @@ parser = argparse.ArgumentParser(description='Spectrogram generator',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('audio_src', help='Destination of audio files')
 parser.add_argument('ir_src', help='Destination of IRs')
-parser.add_argument('output_path', help='Destination of IRs')
+parser.add_argument('output_path', help='Destination of outputs')
 args = parser.parse_args()
 
 # get paths for where audio data is currently
 audio_filepath = Path(args.audio_src)
-audio_filenames = sorted(audio_filepath.glob('alba*.wav'))
+audio_files = sorted(audio_filepath.glob('alba*.wav'))
+
+# only use files over 2.5s long
+audio_filenames = []
+for file in audio_files:
+    t = torchaudio.load(file)
+    if t[0].shape[1] > 120000:
+        audio_filenames.append(file)
 
 # split into test and dev sets
 train_size = int(0.9 * len(audio_filenames))
@@ -38,10 +46,13 @@ ir_filenames = [x for x in ir_filenames if not x.name.startswith('.')]
 spec_path = Path(args.output_path)
 
 # set up values for the spectrogram as hyperparams
-sample_rate = 24000  # sample rate needs to match audio files
+sample_rate = 48000  # sample rate needs to match audio files
 n_fft = 800  # size of FFT, default 400
 normalized = False  # normalize after FFT, can be True or False
 transform = T.Spectrogram(n_fft=n_fft, normalized=normalized)
+
+# set up cropping function for cropping audio file - 96k for 2s
+crop = torchvision.transforms.RandomCrop(size=(1, 96000))
 
 def process_ir(ir_filepath, desired_sr):
     waveform, sr = torchaudio.load(ir_filepath)
@@ -65,13 +76,13 @@ def process_spectrograms_from_file(audio_path, sample_rate, out_path):
     waveform, sr = torchaudio.load(audio_path)
     waveform = F.resample(waveform, sr, sample_rate)
     # crop file - as some short utterances, crops from 0.25s in to 1.25s
-    waveform = waveform[0:1, 6000:sample_rate + 6000]
+    waveform = crop(waveform)
     spec = transform(waveform)
     torch.save(spec, out_path)
 
 def process_spectrograms_from_object(waveform, sample_rate, out_path):
     # crop file - as some short utterances, crops from 0.25s in to 1.25s
-    waveform = waveform[0:1, 6000:sample_rate + 6000]
+    waveform = crop(waveform)
     spec = transform(waveform)
     torch.save(spec, out_path)
 print(len(train_files))
@@ -118,4 +129,4 @@ for ir in ir_filenames:
         convolved_speech = process_speech(file, sample_rate, processed_ir)
         output_path = spec_path/'train'/'{}'.format(ir.stem)/'rt{}_{:04}.pt'.format(ir.stem, count)
         process_spectrograms_from_object(convolved_speech, sample_rate, output_path)
-
+        
