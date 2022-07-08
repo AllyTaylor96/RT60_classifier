@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 import torchaudio
 import torch.nn.functional as F
+import torchvision
 import pickle
 from utils import *
 from torch.utils.data import Dataset, DataLoader
@@ -64,7 +65,7 @@ else:
 Set up hyperparameters, variables for training and import model
 """
 learning_rate = 0.0001
-num_epochs = 25
+num_epochs = 10
 loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(resnet_model.parameters(), lr=learning_rate)
 resnet_model = resnet_model.to(device)

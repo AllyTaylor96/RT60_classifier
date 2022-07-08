@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import time
 import torch.nn.functional as F
-
+import torchvision
 
 if torch.cuda.is_available():
     device = torch.device('cuda:0')
@@ -21,8 +21,11 @@ def lr_decay(learning_rate, optimizer, epoch):
     print(f'Changed learning rate to {new_lr}')
   return optimizer
 
+# set up crop function for loading in the specs of 2s size
+crop = torchvision.transforms.RandomCrop(size=(401,241))
+
 def pt_loader(path, eps=1e-6):
-  spec = torch.load(path)
+  spec = crop(torch.load(path))
   mean = spec.mean()
   std = spec.std()
   spec_norm = (spec - mean) / (std + eps)
