@@ -1,0 +1,6 @@
+Actual RT: 0.0 | Predictions: Counter({'0.0': 307}) 
+Actual RT: 0.2 | Predictions: Counter({'0.0': 307}) 
+Actual RT: 0.4 | Predictions: Counter({'0.0': 307}) 
+Actual RT: 0.6 | Predictions: Counter({'0.0': 307}) 
+Actual RT: 0.8 | Predictions: Counter({'0.0': 307}) 
+Actual RT: 1.0 | Predictions: Counter({'0.0': 307})

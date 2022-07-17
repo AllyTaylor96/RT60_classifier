@@ -1,6 +1,0 @@
-Actual RT: 0.0 | Predictions: Counter({'0.0': 307}) 
-Actual RT: 0.2 | Predictions: Counter({'0.2': 301, '0.0': 6}) 
-Actual RT: 0.4 | Predictions: Counter({'0.4': 304, '0.8': 3}) 
-Actual RT: 0.6 | Predictions: Counter({'0.6': 299, '0.8': 5, '1.0': 3}) 
-Actual RT: 0.8 | Predictions: Counter({'1.0': 172, '0.8': 135}) 
-Actual RT: 1.0 | Predictions: Counter({'1.0': 166, '0.8': 141})

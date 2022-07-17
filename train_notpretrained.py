@@ -13,7 +13,7 @@ import pickle
 from utils import *
 from torch.utils.data import Dataset, DataLoader
 from torchvision.datasets import DatasetFolder
-from models.resnet import resnet_model
+from models.resnet_notpretrained import resnet_model
 from pathlib import Path
 import argparse
 from training_functions import *
@@ -65,7 +65,7 @@ else:
 Set up hyperparameters, variables for training and import model
 """
 learning_rate = 0.0001
-num_epochs = 20
+num_epochs = 50
 loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(resnet_model.parameters(), lr=learning_rate)
 resnet_model = resnet_model.to(device)
@@ -75,7 +75,7 @@ valid_losses = []
 train_history = {}
 accuracy_history = {}
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min',
-                                                       patience=5)
+                                                       patience = 5)
 """
 Main training loop below
 """
@@ -83,13 +83,13 @@ print('Beginning Training...')
 train(resnet_model, loss_fn, training_generator, validation_generator,
       num_epochs, optimizer, train_losses, valid_losses, train_history,
       accuracy_history, scheduler)
-path = '2s_rt60_classifier.pt'
+path = 'NP_2s_rt60_classifier.pt'
 torch.save(resnet_model, path)
 
 """
 Save results and plot the history
 """
-with open('results/2s_results_bs{}_lr{}_epochs{}.txt'.format(params['batch_size'], learning_rate, num_epochs), 'w') as f:
+with open('results/NP_2s_results_bs{}_lr{}_epochs{}.txt'.format(params['batch_size'], learning_rate, num_epochs), 'w') as f:
     f.write('Training Loss per epoch: \n')
     for key in train_history.keys():
         f.write("'{}':'{}'\n".format(key, train_history[key]))
@@ -108,4 +108,4 @@ ax.plot(list(accuracy_history.values()), lw=3)
 ax.set_title('Training Accuracy', size=15)
 ax.set_xlabel('Epoch', size=15)
 ax.tick_params(axis='both', which='major', labelsize=15)
-plt.savefig('results/2s_training_graph_bs{}_lr{}_epochs{}.png'.format(params['batch_size'], learning_rate, num_epochs))
+plt.savefig('results/NP_2s_training_graph_bs{}_lr{}_epochs{}.png'.format(params['batch_size'], learning_rate, num_epochs))

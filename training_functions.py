@@ -41,45 +41,56 @@ def pt_loader(path, eps=1e-6):
 def train(model, loss_fn, train_loader, valid_loader, epochs, optimizer,
           train_losses, valid_losses, train_history, accuracy_history,
           scheduler):
-  start_time = time.time()
-  for epoch in range(1,epochs+1):
-    model.train()
-    batch_losses=[]
-    for i, data in enumerate(train_loader):
-      if i % 200 == 0:
-          print('{} batches completed in training'.format(i))
-      x, y = data
-      x, y = x.to(device), y.to(device)
-      optimizer.zero_grad()
-      x = x.to(device, dtype=torch.float32)
-      y = y.to(device, dtype=torch.long)
-      y_hat = model(x)
-      loss = loss_fn(y_hat, y)
-      loss.backward()
-      batch_losses.append(loss.item())
-      optimizer.step()
-    train_losses.append(batch_losses)
-    print(f'Epoch - {epoch} Train-Loss : {np.mean(train_losses[-1])}')
-    train_history[epoch] = np.mean(train_losses[-1])
-    model.eval()
-    batch_losses=[]
-    trace_y = []
-    trace_yhat = []
-    for i, data in enumerate(valid_loader):
-      x, y = data
-      x = x.to(device, dtype=torch.float32)
-      y = y.to(device, dtype=torch.long)
-      y_hat = model(x)
-      loss = loss_fn(y_hat, y)
-      trace_y.append(y.cpu().detach().numpy())
-      trace_yhat.append(y_hat.cpu().detach().numpy())
-      batch_losses.append(loss.item())
-    valid_losses.append(batch_losses)
-    scheduler.step(np.mean(valid_losses[-1]))
-    trace_y = np.concatenate(trace_y)
-    trace_yhat = np.concatenate(trace_yhat)
-    accuracy = np.mean(trace_yhat.argmax(axis=1)==trace_y)
-    end_time = time.time()
-    print(f'Epoch - {epoch} Valid-Loss : {np.mean(valid_losses[-1])} Valid-Accuracy : {accuracy}')
-    print('Elapsed time {}mins'.format(int(end_time - start_time) / 60))
-    accuracy_history[epoch] = accuracy
+    best_epoch = 0
+    best_accuracy = 0
+    start_time = time.time()
+    for epoch in range(1, epochs+1):
+        model.train()
+        batch_losses = []
+        for i, data in enumerate(train_loader):
+            if i % 200 == 0:
+                print('{} batches completed in training'.format(i))
+            x, y = data
+            x, y = x.to(device), y.to(device)
+            optimizer.zero_grad()
+            x = x.to(device, dtype=torch.float32)
+            y = y.to(device, dtype=torch.long)
+            y_hat = model(x)
+            loss = loss_fn(y_hat, y)
+            loss.backward()
+            batch_losses.append(loss.item())
+            optimizer.step()
+        train_losses.append(batch_losses)
+        print(f'Epoch - {epoch} Train-Loss : {np.mean(train_losses[-1])}')
+        train_history[epoch] = np.mean(train_losses[-1])
+        model.eval()
+        batch_losses = []
+        trace_y = []
+        trace_yhat = []
+        for i, data in enumerate(valid_loader):
+            x, y = data
+            x = x.to(device, dtype=torch.float32)
+            y = y.to(device, dtype=torch.long)
+            y_hat = model(x)
+            loss = loss_fn(y_hat, y)
+            trace_y.append(y.cpu().detach().numpy())
+            trace_yhat.append(y_hat.cpu().detach().numpy())
+            batch_losses.append(loss.item())
+        valid_losses.append(batch_losses)
+        scheduler.step(np.mean(valid_losses[-1]))
+        trace_y = np.concatenate(trace_y)
+        trace_yhat = np.concatenate(trace_yhat)
+        accuracy = np.mean(trace_yhat.argmax(axis=1)==trace_y)
+        end_time = time.time()
+        if accuracy > best_accuracy:
+            best_accuracy = accuracy
+            best_epoch = epoch
+            print('Updated best epoch: new best epoch {} best acc {}'.format(best_epoch,
+                                                                         best_accuracy))
+        print(f'Epoch - {epoch} Valid-Loss : {np.mean(valid_losses[-1])} Valid-Accuracy : {accuracy}')
+        print('Elapsed time {}mins'.format(int(end_time - start_time) / 60))
+        accuracy_history[epoch] = accuracy
+        torch.save(model, 'epochs/{}.pt'.format(epoch))
+    # save best model
+    best_model = torch.load('epochs/{}.pt'.format(best_epoch))
+    torch.save(best_model, 'best_model.pt')

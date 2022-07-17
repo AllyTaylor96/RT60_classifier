@@ -15,6 +15,7 @@ import numpy as np
 # load in file location
 parser = argparse.ArgumentParser(description='Test RT60',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument('model', help='Saved model to be used')
 parser.add_argument('test_path', help='Destination of test files')
 args = parser.parse_args()
 
@@ -24,7 +25,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # load in classifier classes, saved model and put into eval mode
 classifier_classes = pickle.load(open('results/classes', 'rb'))
-model = torch.load('2s_rt60_classifier.pt')
+model = torch.load(args.model)
 model.eval()
 if torch.cuda.is_available():
         model.cuda()
@@ -60,7 +61,7 @@ for path in sorted(data_direc.glob('*.pt')):
 # print amount of each class detected
 #from pprint import pprint
 #pprint(results)
-with open('results/2s_test_results.txt', 'w') as f:
+with open('results/{}_test_results.txt'.format(args.model), 'w') as f:
     f.write('Actual RT: 0.0 | Predictions: {} \n'.format(Counter(results_00)))
     f.write('Actual RT: 0.2 | Predictions: {} \n'.format(Counter(results_02)))
     f.write('Actual RT: 0.4 | Predictions: {} \n'.format(Counter(results_04)))
@@ -86,5 +87,5 @@ plt.figure(figsize=(12, 7))
 sn.heatmap(df_cm, annot=True)
 plt.xlabel('Predicted label')
 plt.ylabel('Actual label')
-plt.title('RT60 2.0 Classifier Performance')
-plt.savefig('results/2s_cf_mat.png')
+plt.title('{} Classifier Performance'.format(args.model))
+plt.savefig('results/{}_cf_mat.png'.format(args.model))

@@ -1,8 +1,0 @@
-IRS used for task
-
-RT60 of 0 (effectively) - N/A
-RT60 of 0.2 - SLR28/RIRS_NOISES/simulated_rirs/mediumroom/Room109/Room109-00093.wav - 0.2005s RT60
-RT60 of 0.4 - SLR28/RIRS_NOISES/simulated_rirs/mediumroom/Room003/Room003-00079.wav - 0.4001s RT60
-RT60 of 0.6 - SLR28/RIRS_NOISES/simulated_rirs/largeroom/Room021/Room021-00096.wav - 0.6008s RT60
-RT60 of 0.8 - SLR28/RIRS_NOISES/simulated_rirs/mediumroom/Room186/Room186-00089.wav - 0.8009s RT60
-RT60 of 1.0 - SLR28/RIRS_NOISES/simulated_rirs/largeroom/Room173/Room173-00073.wav - 1.008s RT60
